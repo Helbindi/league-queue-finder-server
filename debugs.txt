@@ -1,0 +1,37 @@
+Issue #1: Clicking Like button in client frontend would not update unless User refreshes page.
+    Solution: fix code in server/controller/posts.js -> likePost()
+
+    await PostMessage.findByIdAndUpdate(id, post, { new: true });
+    res.json({ message: "Post was liked..." });
+                        |
+                        v
+    const updateLike = await PostMessage.findByIdAndUpdate(id, post, { new: true });
+    res.json(updateLike);
+
+Issue #2: Updating post would not display the Username on post after edit.
+    Solution: fix code in server/controller/posts.js -> updatePost()
+    
+        -> include username list of elements 
+    const { username, creator, title, message, tags, likes } = req.body;
+    const updatePost = { username, creator, title, message, tags, likes, _id: id};
+
+Issue #3:
+{
+  "message": {
+    "stringValue": "\"search\"",
+    "valueType": "string",
+    "kind": "ObjectId",
+    "value": "search",
+    "path": "_id",
+    "reason": {
+      
+    },
+    "name": "CastError",
+    "message": "Cast to ObjectId failed for value \"search\" (type string) at path \"_id\" for model \"PostMessage\""
+  }
+}
+
+    Solution:
+    For some reason, the /search route must be before /:id route - otherwise return above error:
+        router.get('/search', getPostsBySearch);
+        router.get('/:id', getPost); 
