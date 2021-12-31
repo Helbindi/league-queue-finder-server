@@ -10,4 +10,6 @@ const userSchema = mongoose.Schema({
     default: 'Hope to see you on the Rift soon!'},
 });
 
-export default mongoose.model("User", userSchema);
+var User = mongoose.model('User', userSchema);
+
+export default User;
