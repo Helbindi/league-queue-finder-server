@@ -75,12 +75,37 @@ export const getUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { username, email, message } = req.body;
+    var isExist = false;
+
+    // check if username or email is already used...
+    const users = await UserModal.find();
 
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`User with id: ${id} does not exist...`);
+    
+    {users.map((user) => {
+        if(user._id.toString() !== id) {
+            // if username or email already exists.
+            if(user.username.toLowerCase() === username.toLowerCase()) {
+                isExist = true;
+                return;
+            }
+            if(user.email.toLowerCase() === email.toLowerCase()) {
+                isExist = true;
+                return;
+            }
+        }
+    })}
 
-    const updateUser = { username, email, message, _id: id };
+    if(isExist) {
+        res.status(404).json({ message: `User with requested values already exist...` });
+    } else {
+        // username or email is not in use, update User.
+        const updateUser = { username, email, message, _id: id };
+    
+        await UserModal.findByIdAndUpdate(id, updateUser, { new: true });
+    
+        res.json(updateUser);
+    }
 
-    await UserModal.findByIdAndUpdate(id, updateUser, { new: true });
 
-    res.json(updateUser);
 };
