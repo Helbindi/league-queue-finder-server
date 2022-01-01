@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 
 import UserModal from "../models/user.js";
+import PostMessage from "../models/postMessage.js";
 
 const router = express.Router();
 const secret = 'test';
@@ -101,8 +102,15 @@ export const updateUser = async (req, res) => {
     } else {
         // username or email is not in use, update User.
         const updateUser = { username, email, message, _id: id };
-    
         await UserModal.findByIdAndUpdate(id, updateUser, { new: true });
+
+        // update all Posts with new Username
+        const posts = await PostMessage.find({creator: id}).sort({ _id: -1 });
+        {posts.map(async (post) => {
+            const updatePost = { username };
+            // TODO: updates do not change the username of comments. Maybe have to refactor code.
+            await PostMessage.findByIdAndUpdate(post._id, updatePost, { new: true });
+        })};
     
         res.json(updateUser);
     }
