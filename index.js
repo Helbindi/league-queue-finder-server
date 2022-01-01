@@ -18,6 +18,10 @@ app.use(cors());
 app.use('/posts', postRoutes);
 app.use('/user', userRoutes);
 
+app.get('/', (req, res) => {
+    res.send(`Welcome to Helbindi's LFF API`);
+});
+
 mongoose.connect(process.env.MONGODB_CONNECTION)
     .then(() => app.listen(PORT, () => console.log(`Server Running on Port: http://localhost:${PORT}`)))
     .catch((error) => console.log(`${error} did not connect...`));
